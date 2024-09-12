@@ -6,7 +6,7 @@
 * You should have received a copy of the GNU General Public License along with
 * this program.  If not, see <https://www.gnu.org/licenses/>.
 *
-* Updated: 2024-09-09
+* Updated: 2024-09-12
 */
 
 #include <QChar>
@@ -156,15 +156,8 @@ public:
 
 	// Comparison:
 
-	bool operator==(const Path& other) const
-	{
-		return m_path == other.m_path;
-	}
-
-	bool operator!=(const Path& other) const
-	{
-		return !(*this == other);
-	}
+	bool operator==(const Path& other) const = default;
+	bool operator!=(const Path& other) const = default;
 
 	// Concatenation:
 
