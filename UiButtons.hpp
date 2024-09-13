@@ -127,7 +127,7 @@ public:
 		_updateText();
 	}
 
-	void toggle()
+	void toggleFlagged()
 	{
 		setFlagged(!flagged());
 	}
