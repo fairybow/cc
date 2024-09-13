@@ -48,7 +48,7 @@ public:
 	enum class SkipArg0 { No, Yes };
 	enum class ValidOnly { No, Yes };
 
-	enum class System
+	enum System
 	{
 		Root,
 		AppConfig,
@@ -79,7 +79,7 @@ public:
 	Path(const char* path) : m_path(path) {}
 	Path(const std::string& path) : m_path(path) {}
 	Path(const QString& path) : m_path(path.toStdString()) {}
-	Path(System location) : m_path(_system(location)) {}
+	Path(System location) : m_path(_fromSystem(location)) {}
 
 	/// @brief Creates all directories in the specified path
 	static bool mkdir(const Path& path)
@@ -413,12 +413,12 @@ private:
 		);
 	}
 
-	Path _system(System type) const
+	Path _fromSystem(System type) const
 	{
-		if (type == System::Root)
+		if (type == Root)
 			return Path(QDir::rootPath());
 
-		auto type_map = _systemToQType();
+		auto type_map = _systemToQtType();
 		auto it = type_map.find(type);
 
 		if (it != type_map.end())
@@ -432,7 +432,7 @@ private:
 		System,
 		QStandardPaths::StandardLocation
 		>
-		_systemToQType() const
+		_systemToQtType() const
 	{
 		static const std::unordered_map
 			<
@@ -440,27 +440,27 @@ private:
 			QStandardPaths::StandardLocation
 			> map =
 		{
-			{ System::AppConfig, QStandardPaths::AppConfigLocation },
-			{ System::AppData, QStandardPaths::AppDataLocation },
-			{ System::AppLocalData, QStandardPaths::AppLocalDataLocation },
-			{ System::Applications, QStandardPaths::ApplicationsLocation },
-			{ System::Cache, QStandardPaths::CacheLocation },
-			{ System::Config, QStandardPaths::ConfigLocation },
-			{ System::Desktop, QStandardPaths::DesktopLocation },
-			{ System::Download, QStandardPaths::DownloadLocation },
-			{ System::Documents, QStandardPaths::DocumentsLocation },
-			{ System::Fonts, QStandardPaths::FontsLocation },
-			{ System::GenericCache, QStandardPaths::GenericCacheLocation },
-			{ System::GenericConfig, QStandardPaths::GenericConfigLocation },
-			{ System::GenericData, QStandardPaths::GenericDataLocation },
-			{ System::Home, QStandardPaths::HomeLocation },
-			{ System::Movies, QStandardPaths::MoviesLocation },
-			{ System::Music, QStandardPaths::MusicLocation },
-			{ System::Pictures, QStandardPaths::PicturesLocation },
-			{ System::PublicShare, QStandardPaths::PublicShareLocation },
-			{ System::Runtime, QStandardPaths::RuntimeLocation },
-			{ System::Temp, QStandardPaths::TempLocation },
-			{ System::Templates, QStandardPaths::TemplatesLocation }
+			{ AppConfig, QStandardPaths::AppConfigLocation },
+			{ AppData, QStandardPaths::AppDataLocation },
+			{ AppLocalData, QStandardPaths::AppLocalDataLocation },
+			{ Applications, QStandardPaths::ApplicationsLocation },
+			{ Cache, QStandardPaths::CacheLocation },
+			{ Config, QStandardPaths::ConfigLocation },
+			{ Desktop, QStandardPaths::DesktopLocation },
+			{ Download, QStandardPaths::DownloadLocation },
+			{ Documents, QStandardPaths::DocumentsLocation },
+			{ Fonts, QStandardPaths::FontsLocation },
+			{ GenericCache, QStandardPaths::GenericCacheLocation },
+			{ GenericConfig, QStandardPaths::GenericConfigLocation },
+			{ GenericData, QStandardPaths::GenericDataLocation },
+			{ Home, QStandardPaths::HomeLocation },
+			{ Movies, QStandardPaths::MoviesLocation },
+			{ Music, QStandardPaths::MusicLocation },
+			{ Pictures, QStandardPaths::PicturesLocation },
+			{ PublicShare, QStandardPaths::PublicShareLocation },
+			{ Runtime, QStandardPaths::RuntimeLocation },
+			{ Temp, QStandardPaths::TempLocation },
+			{ Templates, QStandardPaths::TemplatesLocation }
 		};
 
 		return map;
