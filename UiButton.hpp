@@ -4,8 +4,15 @@
 * cc/UiButton.hpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
-* this program.  If not, see <https://www.gnu.org/licenses/>.
+* this program. If not, see <https://www.gnu.org/licenses/>.
 *
+* This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
+* graphical user interfaces. For more information, visit <https://www.qt.io/>.
+*
+* This file uses cc/cc.qrc, which uses Google Material Icons. Google Material
+* Icons are free and open-source. For more information, visit
+* <https://fonts.google.com/icons>.
+* 
 * Updated: 2024-09-12
 */
 
@@ -140,7 +147,7 @@ protected:
 private:
 	static constexpr auto FLAG_PROPERTY = "flagged";
 	static constexpr auto FONT_QRC = \
-		":/ui-button/external/MaterialIcons-Regular.ttf";
+		":/cc/external/MaterialIcons-Regular.ttf";
 
 	QString m_label;
 	QString m_flag;
@@ -151,16 +158,16 @@ private:
 	{
 		static const std::unordered_map<Icon, QChar> map =
 		{
-			{ Icon::Add, QChar(0xe145) },
-			{ Icon::ChevronDown, QChar(0xe5cf) },
-			{ Icon::ChevronLeft, QChar(0xe5cb) },
-			{ Icon::ChevronRight, QChar(0xe5cc) },
-			{ Icon::ChevronUp, QChar(0xe5ce) },
-			{ Icon::Close, QChar(0xe5cd) },
-			{ Icon::Ellipse, QChar(0xe061) },
-			{ Icon::Menu, QChar(0xe5d2) },
-			{ Icon::MenuOpen, QChar(0xe9bd) },
-			{ Icon::Refresh, QChar(0xe5d5) }
+			{ Add, QChar(0xe145) },
+			{ ChevronDown, QChar(0xe5cf) },
+			{ ChevronLeft, QChar(0xe5cb) },
+			{ ChevronRight, QChar(0xe5cc) },
+			{ ChevronUp, QChar(0xe5ce) },
+			{ Close, QChar(0xe5cd) },
+			{ Ellipse, QChar(0xe061) },
+			{ Menu, QChar(0xe5d2) },
+			{ MenuOpen, QChar(0xe9bd) },
+			{ Refresh, QChar(0xe5d5) }
 		};
 
 		return map;
