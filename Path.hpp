@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-* Path.hpp  Copyright (C) 2024  fairybow
+* cc/Path.hpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -79,7 +79,7 @@ public:
 	Path(const char* path) : m_path(path) {}
 	Path(const std::string& path) : m_path(path) {}
 	Path(const QString& path) : m_path(path.toStdString()) {}
-	Path(const System& location) : m_path(_system(location)) {}
+	Path(System location) : m_path(_system(location)) {}
 
 	/// @brief Creates all directories in the specified path
 	static bool mkdir(const Path& path)
@@ -232,7 +232,7 @@ public:
 
 	QString toQString
 	(
-		const Normalize& normalize = Normalize::No,
+		Normalize normalize = Normalize::No,
 		char separator = '/'
 	)
 		const
@@ -255,7 +255,7 @@ public:
 
 	std::string toString
 	(
-		const Normalize& normalize = Normalize::No,
+		Normalize normalize = Normalize::No,
 		char separator = '/'
 	)
 		const
@@ -386,7 +386,7 @@ private:
 	(
 		const QString& arg,
 		QList<Path>& paths,
-		const ValidOnly& validOnly
+		ValidOnly validOnly
 	)
 	{
 		Path path(arg);
@@ -400,7 +400,7 @@ private:
 			paths << path;
 	}
 
-	Path _qStandardLocation(const QStandardPaths::StandardLocation& type) const
+	Path _qStandardLocation(QStandardPaths::StandardLocation type) const
 	{
 		return Path
 		(
@@ -413,7 +413,7 @@ private:
 		);
 	}
 
-	Path _system(const System& type) const
+	Path _system(System type) const
 	{
 		if (type == System::Root)
 			return Path(QDir::rootPath());
