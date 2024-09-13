@@ -212,4 +212,5 @@ private:
 		//style()->unpolish(this); Pretty sure this is wrong/bad/etc
 		//style()->polish(this);
 	}
-};
+
+}; // class UiButton
