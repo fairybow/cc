@@ -25,7 +25,8 @@
 #include <QStyle>
 #include <QToolButton>
 
-#include <unordered_map>
+#include <array>
+#include <utility>
 
 namespace Ui
 {
@@ -43,6 +44,33 @@ namespace Ui
 		MenuOpen,
 		Refresh
 	};
+
+	inline constexpr static std::array<std::pair<Icon, QChar>, 10> ICON_HEX_MAP =
+	{
+		{
+			{ Add, QChar(0xe145) },
+			{ ChevronDown, QChar(0xe5cf) },
+			{ ChevronLeft, QChar(0xe5cb) },
+			{ ChevronRight, QChar(0xe5cc) },
+			{ ChevronUp, QChar(0xe5ce) },
+			{ Close, QChar(0xe5cd) },
+			{ Ellipse, QChar(0xe061) },
+			{ Menu, QChar(0xe5d2) },
+			{ MenuOpen, QChar(0xe9bd) },
+			{ Refresh, QChar(0xe5d5) }
+		}
+	};
+
+	inline constexpr QChar getIconHex(Icon icon)
+	{
+		for (const auto& pair : ICON_HEX_MAP)
+		{
+			if (pair.first == icon)
+				return pair.second;
+		}
+
+		return {};
+	}
 
 	template <typename QButtonT>
 	class ButtonBase : public QButtonT
@@ -161,36 +189,9 @@ namespace Ui
 		bool m_flagged = false;
 		bool m_hoveredOver = false;
 
-		const std::unordered_map<Icon, QChar>& _iconHexMap() const
-		{
-			static const std::unordered_map<Icon, QChar> map =
-			{
-				{ Add, QChar(0xe145) },
-				{ ChevronDown, QChar(0xe5cf) },
-				{ ChevronLeft, QChar(0xe5cb) },
-				{ ChevronRight, QChar(0xe5cc) },
-				{ ChevronUp, QChar(0xe5ce) },
-				{ Close, QChar(0xe5cd) },
-				{ Ellipse, QChar(0xe061) },
-				{ Menu, QChar(0xe5d2) },
-				{ MenuOpen, QChar(0xe9bd) },
-				{ Refresh, QChar(0xe5d5) }
-			};
-
-			return map;
-		}
-
 		const QString _iconText(Icon icon) const
 		{
-			auto& map = _iconHexMap();
-			QChar font_icon{};
-
-			auto it = map.find(icon);
-
-			if (it != map.end())
-				font_icon = it->second;
-
-			return QString(font_icon);
+			return getIconHex(icon);
 		}
 
 		const QFont _uiFont() const
