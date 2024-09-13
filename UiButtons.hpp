@@ -27,10 +27,8 @@
 
 #include <unordered_map>
 
-template <typename QButtonT>
-class UiButtonBase : public QButtonT
+namespace Ui
 {
-public:
 	enum Icon
 	{
 		None = 0,
@@ -46,194 +44,200 @@ public:
 		Refresh
 	};
 
-	UiButtonBase
-	(
-		const QString& text,
-		QWidget* parent = nullptr,
-		const QString& flaggedText = QString{}
-	)
-		:
-		QButtonT(parent),
-		m_label(text),
-		m_flag(flaggedText)
+	template <typename QButtonT>
+	class ButtonBase : public QButtonT
 	{
-		_updateText();
-	}
-
-	// Lmao
-	UiButtonBase
-	(
-		Icon icon,
-		QWidget* parent = nullptr,
-		Icon flag = Icon{}
-	)
-		:
-		UiButtonBase
+	public:
+		ButtonBase
 		(
-			_iconText(icon),
-			parent,
-			_iconText(flag)
+			const QString& text,
+			QWidget* parent = nullptr,
+			const QString& flaggedText = QString{}
 		)
-	{
-		QButtonT::setFont(_uiFont());
-	}
-
-	virtual ~UiButtonBase() = default;
-
-	bool hoveredOver() const noexcept
-	{
-		return m_hoveredOver;
-	}
-
-	QString label() const
-	{
-		return m_label;
-	}
-
-	void setLabel(const QString& text)
-	{
-		m_label = text;
-	}
-
-	void setLabel(Icon icon)
-	{
-		m_label = _iconText(icon);
-	}
-
-	QString flag() const
-	{
-		return m_flag;
-	}
-
-	void setFlag(const QString& text)
-	{
-		m_flag = text;
-	}
-
-	void setFlag(Icon icon)
-	{
-		m_flag = _iconText(icon);
-	}
-
-	bool flagged() const
-	{
-		return m_flagged;
-	}
-
-	void setFlagged(bool flagged = true)
-	{
-		m_flagged = flagged;
-
-		_updateText();
-	}
-
-	void toggleFlagged()
-	{
-		setFlagged(!flagged());
-	}
-
-protected:
-	virtual void enterEvent(QEnterEvent* event) override
-	{
-		QButtonT::enterEvent(event);
-		m_hoveredOver = true;
-
-		_updateText();
-	}
-
-	virtual void leaveEvent(QEvent* event) override
-	{
-		QButtonT::leaveEvent(event);
-		m_hoveredOver = false;
-
-		_updateText();
-	}
-
-private:
-	static constexpr auto FLAG_PROPERTY = "flagged";
-	static constexpr auto FONT_QRC = \
-		":/cc/external/MaterialIcons-Regular.ttf";
-
-	QString m_label;
-	QString m_flag;
-	bool m_flagged = false;
-	bool m_hoveredOver = false;
-
-	const std::unordered_map<Icon, QChar>& _iconHexMap() const
-	{
-		static const std::unordered_map<Icon, QChar> map =
+			:
+			QButtonT(parent),
+			m_label(text),
+			m_flag(flaggedText)
 		{
-			{ Add, QChar(0xe145) },
-			{ ChevronDown, QChar(0xe5cf) },
-			{ ChevronLeft, QChar(0xe5cb) },
-			{ ChevronRight, QChar(0xe5cc) },
-			{ ChevronUp, QChar(0xe5ce) },
-			{ Close, QChar(0xe5cd) },
-			{ Ellipse, QChar(0xe061) },
-			{ Menu, QChar(0xe5d2) },
-			{ MenuOpen, QChar(0xe9bd) },
-			{ Refresh, QChar(0xe5d5) }
-		};
+			_updateText();
+		}
 
-		return map;
-	}
+		// Lmao
+		ButtonBase
+		(
+			Icon icon,
+			QWidget* parent = nullptr,
+			Icon flag = Icon{}
+		)
+			:
+			ButtonBase
+			(
+				_iconText(icon),
+				parent,
+				_iconText(flag)
+			)
+		{
+			QButtonT::setFont(_uiFont());
+		}
 
-	const QString _iconText(Icon icon) const
+		virtual ~ButtonBase() = default;
+
+		bool hoveredOver() const noexcept
+		{
+			return m_hoveredOver;
+		}
+
+		QString label() const
+		{
+			return m_label;
+		}
+
+		void setLabel(const QString& text)
+		{
+			m_label = text;
+		}
+
+		void setLabel(Icon icon)
+		{
+			m_label = _iconText(icon);
+		}
+
+		QString flag() const
+		{
+			return m_flag;
+		}
+
+		void setFlag(const QString& text)
+		{
+			m_flag = text;
+		}
+
+		void setFlag(Icon icon)
+		{
+			m_flag = _iconText(icon);
+		}
+
+		bool flagged() const
+		{
+			return m_flagged;
+		}
+
+		void setFlagged(bool flagged = true)
+		{
+			m_flagged = flagged;
+
+			_updateText();
+		}
+
+		void toggleFlagged()
+		{
+			setFlagged(!flagged());
+		}
+
+	protected:
+		virtual void enterEvent(QEnterEvent* event) override
+		{
+			QButtonT::enterEvent(event);
+			m_hoveredOver = true;
+
+			_updateText();
+		}
+
+		virtual void leaveEvent(QEvent* event) override
+		{
+			QButtonT::leaveEvent(event);
+			m_hoveredOver = false;
+
+			_updateText();
+		}
+
+	private:
+		static constexpr auto FLAG_PROPERTY = "flagged";
+		static constexpr auto FONT_QRC = \
+			":/cc/external/MaterialIcons-Regular.ttf";
+
+		QString m_label;
+		QString m_flag;
+		bool m_flagged = false;
+		bool m_hoveredOver = false;
+
+		const std::unordered_map<Icon, QChar>& _iconHexMap() const
+		{
+			static const std::unordered_map<Icon, QChar> map =
+			{
+				{ Add, QChar(0xe145) },
+				{ ChevronDown, QChar(0xe5cf) },
+				{ ChevronLeft, QChar(0xe5cb) },
+				{ ChevronRight, QChar(0xe5cc) },
+				{ ChevronUp, QChar(0xe5ce) },
+				{ Close, QChar(0xe5cd) },
+				{ Ellipse, QChar(0xe061) },
+				{ Menu, QChar(0xe5d2) },
+				{ MenuOpen, QChar(0xe9bd) },
+				{ Refresh, QChar(0xe5d5) }
+			};
+
+			return map;
+		}
+
+		const QString _iconText(Icon icon) const
+		{
+			auto& map = _iconHexMap();
+			QChar font_icon{};
+
+			auto it = map.find(icon);
+
+			if (it != map.end())
+				font_icon = it->second;
+
+			return QString(font_icon);
+		}
+
+		const QFont _uiFont() const
+		{
+			static const auto id = QFontDatabase::addApplicationFont(FONT_QRC);
+			QString font = QFontDatabase::applicationFontFamilies(id).at(0);
+
+			return QFont(font);
+		}
+
+		void _updateText()
+		{
+			auto flagged = _flagShouldDisplay();
+
+			flagged
+				? QButtonT::setText(m_flag)
+				: QButtonT::setText(m_label);
+
+			// This is for style sheets
+			QButtonT::setProperty(FLAG_PROPERTY, flagged);
+
+			QButtonT::update();
+		}
+
+		bool _flagShouldDisplay() const
+		{
+			return m_flagged
+				&& !m_hoveredOver
+				&& !m_flag.isNull();
+		}
+
+	}; // class Ui::ButtonBase
+
+	class Button : public ButtonBase<QPushButton>
 	{
-		auto& map = _iconHexMap();
-		QChar font_icon{};
+		Q_OBJECT
 
-		auto it = map.find(icon);
+	public:
+		using ButtonBase<QPushButton>::ButtonBase;
+	};
 
-		if (it != map.end())
-			font_icon = it->second;
-
-		return QString(font_icon);
-	}
-
-	const QFont _uiFont() const
+	class ToolButton : public ButtonBase<QToolButton>
 	{
-		static const auto id = QFontDatabase::addApplicationFont(FONT_QRC);
-		QString font = QFontDatabase::applicationFontFamilies(id).at(0);
+		Q_OBJECT
 
-		return QFont(font);
-	}
+	public:
+		using ButtonBase<QToolButton>::ButtonBase;
+	};
 
-	void _updateText()
-	{
-		auto flagged = _flagShouldDisplay();
-
-		flagged
-			? QButtonT::setText(m_flag)
-			: QButtonT::setText(m_label);
-
-		// This is for style sheets
-		QButtonT::setProperty(FLAG_PROPERTY, flagged);
-
-		QButtonT::update();
-	}
-
-	bool _flagShouldDisplay() const
-	{
-		return m_flagged
-			&& !m_hoveredOver
-			&& !m_flag.isNull();
-	}
-
-}; // class UiButtonBase
-
-class UiPushButton : public UiButtonBase<QPushButton>
-{
-	Q_OBJECT
-
-public:
-	using UiButtonBase<QPushButton>::UiButtonBase;
-};
-
-class UiToolButton : public UiButtonBase<QToolButton>
-{
-	Q_OBJECT
-
-public:
-	using UiButtonBase<QToolButton>::UiButtonBase;
-};
+} // namespace Ui
