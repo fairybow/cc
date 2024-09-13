@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-* cc/UiButton.hpp  Copyright (C) 2024  fairybow
+* cc/UiButtons.hpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -12,24 +12,24 @@
 * This file uses cc/cc.qrc, which uses Google Material Icons. Google Material
 * Icons are free and open-source. For more information, visit
 * <https://fonts.google.com/icons>.
-* 
-* Updated: 2024-09-12
+*
+* Updated: 2024-09-13
 */
 
 #include <QChar>
 #include <QEvent>
 #include <QEnterEvent>
 #include <QFontDatabase>
+#include <QPushButton>
 #include <QString>
 #include <QStyle>
 #include <QToolButton>
 
 #include <unordered_map>
 
-class UiButton : public QToolButton
+template <typename QButtonT>
+class UiButtonBase : public QButtonT
 {
-	Q_OBJECT
-
 public:
 	enum Icon
 	{
@@ -46,14 +46,14 @@ public:
 		Refresh
 	};
 
-	UiButton
+	UiButtonBase
 	(
 		const QString& text,
 		QWidget* parent = nullptr,
 		const QString& flaggedText = QString{}
 	)
 		:
-		QToolButton(parent),
+		QButtonT(parent),
 		m_label(text),
 		m_flag(flaggedText)
 	{
@@ -61,24 +61,24 @@ public:
 	}
 
 	// Lmao
-	UiButton
+	UiButtonBase
 	(
 		Icon icon,
 		QWidget* parent = nullptr,
 		Icon flag = Icon{}
 	)
 		:
-		UiButton
+		UiButtonBase
 		(
 			_iconText(icon),
 			parent,
 			_iconText(flag)
 		)
 	{
-		setFont(_uiFont());
+		QButtonT::setFont(_uiFont());
 	}
 
-	virtual ~UiButton() = default;
+	virtual ~UiButtonBase() = default;
 
 	bool hoveredOver() const noexcept
 	{
@@ -127,10 +127,15 @@ public:
 		_updateText();
 	}
 
+	void toggle()
+	{
+		setFlagged(!flagged());
+	}
+
 protected:
 	virtual void enterEvent(QEnterEvent* event) override
 	{
-		QToolButton::enterEvent(event);
+		QButtonT::enterEvent(event);
 		m_hoveredOver = true;
 
 		_updateText();
@@ -138,7 +143,7 @@ protected:
 
 	virtual void leaveEvent(QEvent* event) override
 	{
-		QToolButton::leaveEvent(event);
+		QButtonT::leaveEvent(event);
 		m_hoveredOver = false;
 
 		_updateText();
@@ -199,8 +204,8 @@ private:
 		auto flagged = _flagShouldDisplay();
 
 		flagged
-			? setText(m_flag)
-			: setText(m_label);
+			? QButtonT::setText(m_flag)
+			: QButtonT::setText(m_label);
 
 		_flagUpdateProperty(flagged);
 	}
@@ -214,10 +219,24 @@ private:
 
 	void _flagUpdateProperty(bool flagged)
 	{
-		setProperty(FLAG_PROPERTY, flagged);
-
-		//style()->unpolish(this); Pretty sure this is wrong/bad/etc
-		//style()->polish(this);
+		QButtonT::setProperty(FLAG_PROPERTY, flagged);
+		QButtonT::update();
 	}
 
-}; // class UiButton
+}; // class UiButtonBase
+
+class UiPushButton : public UiButtonBase<QPushButton>
+{
+	Q_OBJECT
+
+public:
+	using UiButtonBase<QPushButton>::UiButtonBase;
+};
+
+class UiToolButton : public UiButtonBase<QToolButton>
+{
+	Q_OBJECT
+
+public:
+	using UiButtonBase<QToolButton>::UiButtonBase;
+};
