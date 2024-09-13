@@ -207,7 +207,10 @@ private:
 			? QButtonT::setText(m_flag)
 			: QButtonT::setText(m_label);
 
-		_flagUpdateProperty(flagged);
+		// This is for style sheets
+		QButtonT::setProperty(FLAG_PROPERTY, flagged);
+
+		QButtonT::update();
 	}
 
 	bool _flagShouldDisplay() const
@@ -215,12 +218,6 @@ private:
 		return m_flagged
 			&& !m_hoveredOver
 			&& !m_flag.isNull();
-	}
-
-	void _flagUpdateProperty(bool flagged)
-	{
-		QButtonT::setProperty(FLAG_PROPERTY, flagged);
-		QButtonT::update();
 	}
 
 }; // class UiButtonBase
