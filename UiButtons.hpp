@@ -101,6 +101,7 @@ inline constexpr QChar getIconHex(Icon icon)
 	return {};
 }
 
+/// @todo Make track and ball stylable
 class Switch : public QAbstractButton
 {
 	Q_OBJECT	Q_PROPERTY(qreal position READ position WRITE setPosition)
@@ -114,24 +115,16 @@ public:
 		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 		m_animation->setTargetObject(this);
-
-		auto& palette = this->palette();
-
-		m_trackColor[true] = palette.highlight();
-		m_trackColor[false] = palette.dark();
-
-		m_ballColor[true] = palette.highlight();
-		m_ballColor[false] = palette.light();
 	}
 
 	QSize sizeHint() const
 	{
-		auto margin = _margin();
+		auto margins_space = _marginsSpace();
 
 		return QSize
 		(
-			4 * m_trackRadius + 2 * margin, // width
-			2 * m_trackRadius + 2 * margin // height
+			_trackWidth() + margins_space,
+			(2 * m_trackRadius) + margins_space
 		);
 	}
 
@@ -184,29 +177,8 @@ protected:
 		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, true);
 		painter.setPen(Qt::NoPen);
 
-		auto track_opacity = m_opacity;
-
-		QBrush track_brush;
-		QBrush ball_brush; // lol
-
-		if (this->isEnabled())
-		{
-			auto checked = isChecked();
-			track_brush = m_trackColor[checked];
-			ball_brush = m_ballColor[checked];
-		}
-		else
-		{
-			auto& palette = this->palette();
-			auto& shadow = palette.shadow();
-
-			track_opacity *= 0.8;
-			track_brush = shadow;
-			ball_brush = palette.mid();
-		}
-
-		_paintTrack(painter, track_brush, track_opacity);
-		_paintBall(painter, ball_brush);
+		_paintTrack(painter);
+		_paintBall(painter);
 	}
 
 	void resizeEvent(QResizeEvent* event) override
@@ -222,17 +194,25 @@ private:
 
 	qreal m_trackRadius = 10;
 	qreal m_ballRadius = 8;
-	qreal m_opacity = 0.5;
-
 	qreal m_currentBallPosition = _offPosition();
 
-	std::array<QBrush, 2> m_trackColor{};
-	std::array<QBrush, 2> m_ballColor{};
+	qreal _trackWidth() const
+	{
+		return 3.6 * m_trackRadius;
+	}
 
-	qreal _margin() const
+	// If the ball is smaller than the track, we can return 0. Otherwise, we
+	// need a margin that accounts for the amount by which the ball is larger
+	// than the track
+	qreal _trackMargin() const
 	{
 		auto radius_diff = m_ballRadius - m_trackRadius;
 		return (radius_diff < 0) ? 0 : radius_diff;
+	}
+
+	qreal _marginsSpace() const
+	{
+		return 2 * _trackMargin();
 	}
 
 	qreal _offPosition() const
@@ -244,7 +224,7 @@ private:
 
 	qreal _onPosition() const
 	{
-		return 4 * m_trackRadius + 2 * _margin() - _offPosition();
+		return _trackWidth() + _marginsSpace() - _offPosition();
 	}
 
 	qreal _currentDestination() const
@@ -252,28 +232,58 @@ private:
 		return isChecked() ? _onPosition() : _offPosition();
 	}
 
-	void _paintTrack(QPainter& painter, QBrush& brush, qreal opacity) const
+	QBrush _ballBrush() const
 	{
-		painter.setBrush(brush);
-		painter.setOpacity(opacity);
+		if (isEnabled())
+		{
+			return isChecked()
+				? palette().highlight()
+				: palette().light();
+		}
 
-		auto margin = _margin();
+		return palette().mid();
+	}
+
+	QBrush _trackBrush() const
+	{
+		if (isEnabled())
+		{
+			return isChecked()
+				? palette().highlight()
+				: palette().dark();
+		}
+
+		return palette().shadow();
+	}
+
+	qreal _opacity(qreal opacity) const
+	{
+		return isEnabled() ? opacity : opacity * 0.3;
+	}
+
+	void _paintTrack(QPainter& painter) const
+	{
+		painter.setBrush(_trackBrush());
+		painter.setOpacity(_opacity(0.5));
+
+		auto margin = _trackMargin();
+		auto margins_space = _marginsSpace();
 
 		painter.drawRoundedRect
 		(
 			margin,
 			margin,
-			width() - 2 * margin,
-			height() - 2 * margin,
+			width() - _marginsSpace(),
+			height() - _marginsSpace(),
 			m_trackRadius,
 			m_trackRadius
 		);
 	}
 
-	void _paintBall(QPainter& painter, QBrush& brush) const
+	void _paintBall(QPainter& painter) const
 	{
-		painter.setBrush(brush);
-		painter.setOpacity(1.0);
+		painter.setBrush(_ballBrush()); // lol
+		painter.setOpacity(_opacity(1.0));
 
 		painter.drawEllipse
 		(
