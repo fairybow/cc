@@ -117,6 +117,8 @@ public:
 		m_animation->setTargetObject(this);
 	}
 
+	virtual ~Switch() = default;
+
 	QSize sizeHint() const
 	{
 		auto margins_space = _marginsSpace();
