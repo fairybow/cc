@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/cc">
-        <file>external/MaterialIcons-Regular.ttf</file>
+        <file>external/MaterialSymbolsRounded-VariableFont_FILL,GRAD,opsz,wght.ttf</file>
     </qresource>
 </RCC>

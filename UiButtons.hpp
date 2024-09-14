@@ -9,236 +9,441 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* This file uses cc/cc.qrc, which uses Google Material Icons. Google Material
-* Icons are free and open-source. For more information, visit
+* This file uses cc/cc.qrc, which uses Google Material Symbols. Google Material
+* Symbols are free and open-source. For more information, visit
 * <https://fonts.google.com/icons>.
 *
-* Updated: 2024-09-13
+* Ui::Switch based on the hard work of user3559721, found here:
+* <https://codereview.stackexchange.com/questions/249076/>
+*
+* Updated: 2024-09-14
 */
 
+#include <QBrush>
 #include <QChar>
 #include <QEvent>
 #include <QEnterEvent>
+#include <QFont>
 #include <QFontDatabase>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMargins>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QPropertyAnimation>
 #include <QPushButton>
+#include <QSize>
 #include <QString>
-#include <QStyle>
 #include <QToolButton>
 
 #include <array>
 #include <utility>
 
-namespace Ui
+#define BEGIN_CC_UI_NAMESPACE namespace Ui {
+#define END_CC_UI_NAMESPACE }
+
+BEGIN_CC_UI_NAMESPACE
+
+/// @todo Update for Symbols
+enum Icon
 {
-	enum Icon
-	{
-		None = 0,
-		Add,
-		ChevronDown,
-		ChevronLeft,
-		ChevronRight,
-		ChevronUp,
-		Close,
-		Ellipse,
-		Menu,
-		MenuOpen,
-		Refresh
-	};
+	None = 0,
+	Add,
+	ChevronLeft,
+	ChevronRight,
+	Close,
+	Ellipse,
+	ExpandLess,
+	ExpandMore,
+	FormatPaint,
+	Menu,
+	MenuOpen,
+	Refresh
+};
 
-	inline constexpr static std::array<std::pair<Icon, QChar>, 10> ICON_HEX_MAP =
+inline constexpr static std::array<std::pair<Icon, QChar>, 11> ICON_HEX_MAP =
+{
 	{
-		{
-			{ Add, QChar(0xe145) },
-			{ ChevronDown, QChar(0xe5cf) },
-			{ ChevronLeft, QChar(0xe5cb) },
-			{ ChevronRight, QChar(0xe5cc) },
-			{ ChevronUp, QChar(0xe5ce) },
-			{ Close, QChar(0xe5cd) },
-			{ Ellipse, QChar(0xe061) },
-			{ Menu, QChar(0xe5d2) },
-			{ MenuOpen, QChar(0xe9bd) },
-			{ Refresh, QChar(0xe5d5) }
-		}
-	};
+		{ Add, QChar(0xe145) },
+		{ ChevronLeft, QChar(0xe5cb) },
+		{ ChevronRight, QChar(0xe5cc) },
+		{ Close, QChar(0xe5cd) },
+		{ Ellipse, QChar(0xe061) }, // not Material
+		{ ExpandLess, QChar(0xe5ce) },
+		{ ExpandMore, QChar(0xe5cf) },
+		{ FormatPaint, QChar(0xe243) },
+		{ Menu, QChar(0xe5d2) },
+		{ MenuOpen, QChar(0xe9bd) },
+		{ Refresh, QChar(0xe5d5) }
+	}
+};
 
-	inline constexpr QChar getIconHex(Icon icon)
+inline const QFont uiFont()
+{
+	constexpr static auto qrc = \
+		":/cc/external/MaterialSymbolsRounded-VariableFont_FILL,GRAD,opsz,wght.ttf";
+
+	static const auto id = QFontDatabase::addApplicationFont(qrc);
+	QString font = QFontDatabase::applicationFontFamilies(id).at(0);
+
+	return font;
+}
+
+inline constexpr QChar getIconHex(Icon icon)
+{
+	for (const auto& pair : ICON_HEX_MAP)
 	{
-		for (const auto& pair : ICON_HEX_MAP)
-		{
-			if (pair.first == icon)
-				return pair.second;
-		}
-
-		return {};
+		if (pair.first == icon)
+			return pair.second;
 	}
 
-	template <typename QButtonT>
-	class ButtonBase : public QButtonT
+	return {};
+}
+
+class Switch : public QAbstractButton
+{
+	Q_OBJECT	Q_PROPERTY(qreal position READ position WRITE setPosition)
+
+public:
+	Switch(QWidget* parent)
+		: QAbstractButton(parent)
 	{
-	public:
-		ButtonBase
+		setCheckable(true);
+		setChecked(false);
+		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+		m_animation->setTargetObject(this);
+
+		auto& palette = this->palette();
+
+		m_trackColor[true] = palette.highlight();
+		m_trackColor[false] = palette.dark();
+
+		m_ballColor[true] = palette.highlight();
+		m_ballColor[false] = palette.light();
+	}
+
+	QSize sizeHint() const
+	{
+		auto margin = _margin();
+
+		return QSize
 		(
-			const QString& text,
-			QWidget* parent = nullptr,
-			const QString& flaggedText = QString{}
-		)
-			:
-			QButtonT(parent),
-			m_label(text),
-			m_flag(flaggedText)
+			4 * m_trackRadius + 2 * margin, // width
+			2 * m_trackRadius + 2 * margin // height
+		);
+	}
+
+	qreal position() const
+	{
+		return m_currentBallPosition;
+	}
+
+	void setPosition(qreal position)
+	{
+		m_currentBallPosition = position;
+		update();
+	}
+
+	// QAbstractButton::setChecked does not emit the clicked signal
+	void setChecked(bool checked)
+	{
+		QAbstractButton::setChecked(checked);
+		m_currentBallPosition = _currentDestination();
+	}
+
+protected:
+	void enterEvent(QEnterEvent* event) override
+	{
+		setCursor(Qt::PointingHandCursor);
+		QAbstractButton::enterEvent(event);
+	}
+
+	void mouseReleaseEvent(QMouseEvent* event) override
+	{
+		QAbstractButton::mouseReleaseEvent(event);
+
+		if (event->button() == Qt::LeftButton)
 		{
-			_updateText();
+			m_animation->setDuration(ANIMATION_DURATION);
+
+			if (m_animation->state() != QAbstractAnimation::Running)
+				m_animation->setPropertyName(BALL_POSITION_PROPERTY);
+
+			m_animation->setStartValue(m_currentBallPosition);
+			m_animation->setEndValue(_currentDestination());
+
+			m_animation->start();
+		}
+	}
+
+	void paintEvent(QPaintEvent* /*event*/) override
+	{
+		QPainter painter(this);
+		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, true);
+		painter.setPen(Qt::NoPen);
+
+		auto track_opacity = m_opacity;
+
+		QBrush track_brush;
+		QBrush ball_brush; // lol
+
+		if (this->isEnabled())
+		{
+			auto checked = isChecked();
+			track_brush = m_trackColor[checked];
+			ball_brush = m_ballColor[checked];
+		}
+		else
+		{
+			auto& palette = this->palette();
+			auto& shadow = palette.shadow();
+
+			track_opacity *= 0.8;
+			track_brush = shadow;
+			ball_brush = palette.mid();
 		}
 
-		// Lmao
-		ButtonBase
+		_paintTrack(painter, track_brush, track_opacity);
+		_paintBall(painter, ball_brush);
+	}
+
+	void resizeEvent(QResizeEvent* event) override
+	{
+		QAbstractButton::resizeEvent(event);
+		m_currentBallPosition = _currentDestination();
+	}
+
+private:
+	QPropertyAnimation* m_animation = new QPropertyAnimation(this);
+	constexpr static auto ANIMATION_DURATION = 100;
+	constexpr static auto BALL_POSITION_PROPERTY = "position";
+
+	qreal m_trackRadius = 10;
+	qreal m_ballRadius = 8;
+	qreal m_opacity = 0.5;
+
+	qreal m_currentBallPosition = _offPosition();
+
+	std::array<QBrush, 2> m_trackColor{};
+	std::array<QBrush, 2> m_ballColor{};
+
+	qreal _margin() const
+	{
+		auto radius_diff = m_ballRadius - m_trackRadius;
+		return (radius_diff < 0) ? 0 : radius_diff;
+	}
+
+	qreal _offPosition() const
+	{
+		return m_ballRadius > m_trackRadius
+			? m_ballRadius
+			: m_trackRadius;
+	}
+
+	qreal _onPosition() const
+	{
+		return 4 * m_trackRadius + 2 * _margin() - _offPosition();
+	}
+
+	qreal _currentDestination() const
+	{
+		return isChecked() ? _onPosition() : _offPosition();
+	}
+
+	void _paintTrack(QPainter& painter, QBrush& brush, qreal opacity) const
+	{
+		painter.setBrush(brush);
+		painter.setOpacity(opacity);
+
+		auto margin = _margin();
+
+		painter.drawRoundedRect
 		(
-			Icon icon,
-			QWidget* parent = nullptr,
-			Icon flag = Icon{}
+			margin,
+			margin,
+			width() - 2 * margin,
+			height() - 2 * margin,
+			m_trackRadius,
+			m_trackRadius
+		);
+	}
+
+	void _paintBall(QPainter& painter, QBrush& brush) const
+	{
+		painter.setBrush(brush);
+		painter.setOpacity(1.0);
+
+		painter.drawEllipse
+		(
+			m_currentBallPosition - m_ballRadius,
+			_offPosition() - m_ballRadius,
+			2 * m_ballRadius,
+			2 * m_ballRadius
+		);
+	}
+
+}; // class Ui::Switch
+
+/// @todo Rework
+template <typename QButtonT>
+class FlagButtonBase : public QButtonT
+{
+public:
+	FlagButtonBase
+	(
+		const QString& text,
+		QWidget* parent = nullptr,
+		const QString& flaggedText = QString{}
+	)
+		:
+		QButtonT(parent),
+		m_label(text),
+		m_flag(flaggedText)
+	{
+		_updateText();
+	}
+
+	// Lmao
+	FlagButtonBase
+	(
+		Icon icon,
+		QWidget* parent = nullptr,
+		Icon flag = Icon{}
+	)
+		:
+		FlagButtonBase
+		(
+			_iconText(icon),
+			parent,
+			_iconText(flag)
 		)
-			:
-			ButtonBase
-			(
-				_iconText(icon),
-				parent,
-				_iconText(flag)
-			)
-		{
-			QButtonT::setFont(_uiFont());
-		}
-
-		virtual ~ButtonBase() = default;
-
-		bool hoveredOver() const noexcept
-		{
-			return m_hoveredOver;
-		}
-
-		QString label() const
-		{
-			return m_label;
-		}
-
-		void setLabel(const QString& text)
-		{
-			m_label = text;
-		}
-
-		void setLabel(Icon icon)
-		{
-			m_label = _iconText(icon);
-		}
-
-		QString flag() const
-		{
-			return m_flag;
-		}
-
-		void setFlag(const QString& text)
-		{
-			m_flag = text;
-		}
-
-		void setFlag(Icon icon)
-		{
-			m_flag = _iconText(icon);
-		}
-
-		bool flagged() const
-		{
-			return m_flagged;
-		}
-
-		void setFlagged(bool flagged = true)
-		{
-			m_flagged = flagged;
-
-			_updateText();
-		}
-
-		void toggleFlagged()
-		{
-			setFlagged(!flagged());
-		}
-
-	protected:
-		virtual void enterEvent(QEnterEvent* event) override
-		{
-			QButtonT::enterEvent(event);
-			m_hoveredOver = true;
-
-			_updateText();
-		}
-
-		virtual void leaveEvent(QEvent* event) override
-		{
-			QButtonT::leaveEvent(event);
-			m_hoveredOver = false;
-
-			_updateText();
-		}
-
-	private:
-		static constexpr auto FLAG_PROPERTY = "flagged";
-		static constexpr auto FONT_QRC = \
-			":/cc/external/MaterialIcons-Regular.ttf";
-
-		QString m_label;
-		QString m_flag;
-		bool m_flagged = false;
-		bool m_hoveredOver = false;
-
-		const QString _iconText(Icon icon) const
-		{
-			return getIconHex(icon);
-		}
-
-		const QFont _uiFont() const
-		{
-			static const auto id = QFontDatabase::addApplicationFont(FONT_QRC);
-			QString font = QFontDatabase::applicationFontFamilies(id).at(0);
-
-			return QFont(font);
-		}
-
-		void _updateText()
-		{
-			auto flagged = _flagShouldDisplay();
-
-			flagged
-				? QButtonT::setText(m_flag)
-				: QButtonT::setText(m_label);
-
-			// This is for style sheets
-			QButtonT::setProperty(FLAG_PROPERTY, flagged);
-
-			QButtonT::update();
-		}
-
-		bool _flagShouldDisplay() const
-		{
-			return m_flagged
-				&& !m_hoveredOver
-				&& !m_flag.isNull();
-		}
-
-	}; // class Ui::ButtonBase
-
-	class Button : public ButtonBase<QPushButton>
 	{
-		Q_OBJECT
+		QButtonT::setFont(uiFont());
+	}
 
-	public:
-		using ButtonBase<QPushButton>::ButtonBase;
-	};
+	virtual ~FlagButtonBase() = default;
 
-	class ToolButton : public ButtonBase<QToolButton>
+	bool hoveredOver() const noexcept
 	{
-		Q_OBJECT
+		return m_hoveredOver;
+	}
 
-	public:
-		using ButtonBase<QToolButton>::ButtonBase;
-	};
+	QString label() const
+	{
+		return m_label;
+	}
 
-} // namespace Ui
+	void setLabel(const QString& text)
+	{
+		m_label = text;
+	}
+
+	void setLabel(Icon icon)
+	{
+		m_label = _iconText(icon);
+	}
+
+	QString flag() const
+	{
+		return m_flag;
+	}
+
+	void setFlag(const QString& text)
+	{
+		m_flag = text;
+	}
+
+	void setFlag(Icon icon)
+	{
+		m_flag = _iconText(icon);
+	}
+
+	bool flagged() const
+	{
+		return m_flagged;
+	}
+
+	void setFlagged(bool flagged = true)
+	{
+		m_flagged = flagged;
+
+		_updateText();
+	}
+
+	void toggleFlagged()
+	{
+		setFlagged(!m_flagged);
+	}
+
+protected:
+	virtual void enterEvent(QEnterEvent* event) override
+	{
+		QButtonT::enterEvent(event);
+		m_hoveredOver = true;
+
+		_updateText();
+	}
+
+	virtual void leaveEvent(QEvent* event) override
+	{
+		QButtonT::leaveEvent(event);
+		m_hoveredOver = false;
+
+		_updateText();
+	}
+
+private:
+	static constexpr auto FLAG_PROPERTY = "flagged";
+
+	QString m_label;
+	QString m_flag;
+	bool m_flagged = false;
+	bool m_hoveredOver = false;
+
+	const QString _iconText(Icon icon) const
+	{
+		return getIconHex(icon);
+	}
+
+	void _updateText()
+	{
+		auto flagged = _flagShouldDisplay();
+
+		flagged
+			? QButtonT::setText(m_flag)
+			: QButtonT::setText(m_label);
+
+		// This is for style sheets
+		QButtonT::setProperty(FLAG_PROPERTY, flagged);
+
+		QButtonT::update();
+	}
+
+	bool _flagShouldDisplay() const
+	{
+		return m_flagged
+			&& !m_hoveredOver
+			&& !m_flag.isNull();
+	}
+
+}; // class Ui::FlagButtonBase
+
+class FlagButton : public FlagButtonBase<QPushButton>
+{
+	Q_OBJECT
+
+public:
+	using FlagButtonBase<QPushButton>::FlagButtonBase;
+};
+
+class FlagToolButton : public FlagButtonBase<QToolButton>
+{
+	Q_OBJECT
+
+public:
+	using FlagButtonBase<QToolButton>::FlagButtonBase;
+};
+
+END_CC_UI_NAMESPACE
