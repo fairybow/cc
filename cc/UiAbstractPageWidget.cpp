@@ -174,6 +174,22 @@ void AbstractPageWidget::_setupLayouts()
 
 	main_layout->addLayout(top_layout);
 	main_layout->addWidget(m_mainStack);
+
+	auto layouts = QList<QLayout*>
+	{
+		m_leftCornerWidgetLayout,
+		m_controllerLayout,
+		m_rightCornerWidgetLayout,
+		top_layout,
+		main_layout
+	};
+
+	/// @todo Allow setting all simultaneously from outside
+	for (auto& layout : layouts)
+	{
+		layout->setContentsMargins({});
+		layout->setSpacing(0);
+	}
 }
 
 void AbstractPageWidget::_setMember(QPointer<QWidget>& member, QLayout* parentLayout, QWidget* newWidget)
