@@ -198,10 +198,10 @@ public:
 		return m_path;
 	}
 
-	//operator QVariant() const
-	//{
-		//return toQVariant();
-	//}
+	// operator QVariant() const
+	// {
+	// 	return toQVariant();
+	// }
 
 	std::string extString() const
 	{
@@ -246,10 +246,10 @@ public:
 		);
 	}
 
-	//QVariant toQVariant() const
-	//{
-		//return QVariant::fromValue(toQString());
-	//}
+	// QVariant toQVariant() const
+	// {
+	// 	return QVariant::fromValue(toQString());
+	// }
 
 	std::filesystem::path toStd() const
 	{

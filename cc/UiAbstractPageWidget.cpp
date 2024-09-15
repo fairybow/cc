@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-14
+* Updated: 2024-09-15
 */
 
 #include "UiAbstractPageWidget.h"
@@ -21,6 +21,32 @@ AbstractPageWidget::AbstractPageWidget(QWidget* parent)
 {
 	_setupLayouts();
 	_setupStacks();
+}
+
+void AbstractPageWidget::setContentsMargins(const QMargins& margins)
+{
+	for (auto& layout : m_layouts)
+		layout->setContentsMargins(margins);
+}
+
+void AbstractPageWidget::setContentsMargins(int left, int top, int right, int bottom)
+{
+	setContentsMargins({ left, top, right, bottom });
+}
+
+void AbstractPageWidget::setSpacing(int spacing)
+{
+	for (auto& layout : m_layouts)
+		layout->setSpacing(spacing);
+}
+
+void AbstractPageWidget::layoutDump() const
+{
+	for (auto& layout : m_layouts)
+	{
+		layout->dumpObjectTree();
+		layout->dumpObjectInfo();
+	}
 }
 
 QWidget* AbstractPageWidget::cornerWidget(Side side) const
@@ -70,6 +96,16 @@ QPixmap AbstractPageWidget::underlayPixmap() const
 void AbstractPageWidget::setUnderlayPixmap(const QPixmap& pixmap)
 {
 	m_underlay->setPixmap(pixmap);
+}
+
+QString AbstractPageWidget::underlayText() const
+{
+	return m_underlay->text();
+}
+
+void AbstractPageWidget::setUnderlayText(const QString& text)
+{
+	m_underlay->setText(text);
 }
 
 QVariant AbstractPageWidget::data(int index) const
@@ -162,6 +198,7 @@ void AbstractPageWidget::_setupStacks()
 void AbstractPageWidget::_setupLayouts()
 {
 	m_leftCornerWidgetLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	m_controllerLayout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	m_rightCornerWidgetLayout->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
 	auto top_layout = new QHBoxLayout;
@@ -175,7 +212,7 @@ void AbstractPageWidget::_setupLayouts()
 	main_layout->addLayout(top_layout);
 	main_layout->addWidget(m_mainStack);
 
-	auto layouts = QList<QLayout*>
+	m_layouts = QList<QLayout*>
 	{
 		m_leftCornerWidgetLayout,
 		m_controllerLayout,
@@ -183,13 +220,6 @@ void AbstractPageWidget::_setupLayouts()
 		top_layout,
 		main_layout
 	};
-
-	/// @todo Allow setting all simultaneously from outside
-	for (auto& layout : layouts)
-	{
-		layout->setContentsMargins({});
-		layout->setSpacing(0);
-	}
 }
 
 void AbstractPageWidget::_setMember(QPointer<QWidget>& member, QLayout* parentLayout, QWidget* newWidget)

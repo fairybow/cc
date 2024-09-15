@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-14
+* Updated: 2024-09-15
 */
 
 #include "cc_namespaces.hpp"
@@ -17,6 +17,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMargins>
 #include <QPixmap>
 #include <QPointer>
 #include <QString>
@@ -42,10 +43,17 @@ public:
 	AbstractPageWidget(QWidget* parent = nullptr);
 	virtual ~AbstractPageWidget() = default;
 
+	void setContentsMargins(const QMargins& margins);
+	void setContentsMargins(int left, int top, int right, int bottom);
+	void setSpacing(int spacing);
+	void layoutDump() const;
+
 	QWidget* cornerWidget(Side side) const;
 	void setCornerWidget(QWidget* widget, Side side = Right);
 	QPixmap underlayPixmap() const;
 	void setUnderlayPixmap(const QPixmap& pixmap);
+	QString underlayText() const;
+	void setUnderlayText(const QString& text);
 
 	QVariant data(int index) const;
 	void setData(int index, const QVariant& data);
@@ -107,6 +115,9 @@ private:
 	QHBoxLayout* m_leftCornerWidgetLayout = new QHBoxLayout;
 	QHBoxLayout* m_controllerLayout = new QHBoxLayout;
 	QHBoxLayout* m_rightCornerWidgetLayout = new QHBoxLayout;
+
+	// For resizing, respacing from outside
+	QList<QLayout*> m_layouts{};
 
 	QLabel* m_underlay = new QLabel(this);
 	QPointer<QWidget> m_leftCornerWidget{};
