@@ -10,7 +10,7 @@
 * Updated: 2024-09-14
 */
 
-#include "AbstractPageWidget.h"
+#include "UiAbstractPageWidget.h"
 
 #include <QVBoxLayout>
 
