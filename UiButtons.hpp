@@ -19,6 +19,8 @@
 * Updated: 2024-09-14
 */
 
+#include "cc_namespaces.hpp"
+
 #include <QBrush>
 #include <QChar>
 #include <QEvent>
@@ -39,9 +41,6 @@
 
 #include <array>
 #include <utility>
-
-#define BEGIN_CC_UI_NAMESPACE namespace Ui {
-#define END_CC_UI_NAMESPACE }
 
 BEGIN_CC_UI_NAMESPACE
 
@@ -407,7 +406,7 @@ protected:
 	}
 
 private:
-	static constexpr auto FLAG_PROPERTY = "flagged";
+	constexpr static auto FLAG_PROPERTY = "flagged";
 
 	QString m_label;
 	QString m_flag;
