@@ -101,8 +101,7 @@ inline constexpr QChar getIconHex(Icon icon)
 }
 
 /// @todo Make track and ball stylable
-/// @todo Track is not always drawn correctly. For example, using
-/// setCentralWidget, track will take up entire window
+/// @todo Dynamic sizing (shrinking to fit small spaces)
 class Switch : public QAbstractButton
 {
 	Q_OBJECT;
@@ -128,7 +127,7 @@ public:
 		return QSize
 		(
 			_trackWidth() + margins_space,
-			(2 * m_trackRadius) + margins_space
+			_trackHeight() + margins_space
 		);
 	}
 
@@ -205,10 +204,15 @@ private:
 		return 3.6 * m_trackRadius;
 	}
 
+	qreal _trackHeight() const
+	{
+		return 2 * m_trackRadius;
+	}
+
 	// If the ball is smaller than the track, we can return 0. Otherwise, we
 	// need a margin that accounts for the amount by which the ball is larger
 	// than the track
-	qreal _trackMargin() const
+	qreal _ballMargin() const
 	{
 		auto radius_diff = m_ballRadius - m_trackRadius;
 		return (radius_diff < 0) ? 0 : radius_diff;
@@ -216,7 +220,7 @@ private:
 
 	qreal _marginsSpace() const
 	{
-		return 2 * _trackMargin();
+		return 2 * _ballMargin();
 	}
 
 	qreal _offPosition() const
@@ -270,15 +274,17 @@ private:
 		painter.setBrush(_trackBrush());
 		painter.setOpacity(_opacity(0.5));
 
-		auto margin = _trackMargin();
+		auto margin = _ballMargin();
 		auto margins_space = _marginsSpace();
 
 		painter.drawRoundedRect
 		(
 			margin,
 			margin,
-			width() - _marginsSpace(),
-			height() - _marginsSpace(),
+			//width() - _marginsSpace(),
+			_trackWidth(),
+			//height() - _marginsSpace(),
+			_trackHeight(),
 			m_trackRadius,
 			m_trackRadius
 		);
