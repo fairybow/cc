@@ -9,12 +9,13 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-12
+* Updated: 2024-09-16
 */
 
 #include <QChar>
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
@@ -48,6 +49,7 @@ class Path
 {
 public:
 	enum class Normalize { No, Yes };
+	enum class Recursive { No, Yes };
 	enum class SkipArg0 { No, Yes };
 	enum class ValidOnly { No, Yes };
 
@@ -119,6 +121,37 @@ public:
 
 		for (int i = (skipArg0 == SkipArg0::Yes); i < argc; ++i)
 			_argHelper(argv[i], paths, validOnly);
+
+		return paths;
+	}
+
+	/// @todo Sort?
+	static QList<Path> filesIn
+	(
+		const Path& directory,
+		const char* extension,
+		Recursive recursive = Recursive::Yes
+	)
+	{
+		QList<Path> paths{};
+
+		auto iterator_flag = (recursive == Recursive::Yes)
+			? QDirIterator::Subdirectories
+			: QDirIterator::NoIteratorFlags;
+
+		QDirIterator it
+		(
+			directory.toQString(),
+			QStringList() << QString("*.") + extension,
+			QDir::Files,
+			iterator_flag
+		);
+
+		while (it.hasNext())
+		{
+			it.next();
+			paths << it.filePath();
+		}
 
 		return paths;
 	}
