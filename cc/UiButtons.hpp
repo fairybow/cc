@@ -16,7 +16,7 @@
 * Ui::Switch based on the hard work of user3559721, found here:
 * <https://codereview.stackexchange.com/questions/249076/>
 *
-* Updated: 2024-09-14
+* Updated: 2024-09-16
 */
 
 #include "cc_namespaces.hpp"
@@ -101,12 +101,15 @@ inline constexpr QChar getIconHex(Icon icon)
 }
 
 /// @todo Make track and ball stylable
+/// @todo Track is not always drawn correctly. For example, using
+/// setCentralWidget, track will take up entire window
 class Switch : public QAbstractButton
 {
-	Q_OBJECT	Q_PROPERTY(qreal position READ position WRITE setPosition)
+	Q_OBJECT;
+	Q_PROPERTY(qreal position READ position WRITE setPosition)
 
 public:
-	Switch(QWidget* parent)
+	Switch(QWidget* parent = nullptr)
 		: QAbstractButton(parent)
 	{
 		setCheckable(true);
@@ -175,7 +178,7 @@ protected:
 	void paintEvent(QPaintEvent* /*event*/) override
 	{
 		QPainter painter(this);
-		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, true);
+		painter.setRenderHints(QPainter::Antialiasing);
 		painter.setPen(Qt::NoPen);
 
 		_paintTrack(painter);
