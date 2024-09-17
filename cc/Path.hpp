@@ -126,10 +126,10 @@ public:
 	}
 
 	/// @todo Sort?
-	static QList<Path> filesIn
+	static QList<Path> findIn
 	(
 		const Path& directory,
-		const char* extension,
+		const QString& extension,
 		Recursive recursive = Recursive::Yes
 	)
 	{
@@ -142,7 +142,7 @@ public:
 		QDirIterator it
 		(
 			directory.toQString(),
-			QStringList() << QString("*.") + extension,
+			QStringList{} << "*." + extension,
 			QDir::Files,
 			iterator_flag
 		);
