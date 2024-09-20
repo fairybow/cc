@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-15
+* Updated: 2024-09-20
 */
 
 #include "cc_namespaces.hpp"
@@ -35,10 +35,7 @@ public:
 		_setupComboBox();
 	}
 
-	~DropDownPageWidget()
-	{
-		qDebug() << __FUNCTION__;
-	}
+	~DropDownPageWidget() = default;
 
 	int addPage(QWidget* widget, const QString& label, const QVariant& data = {}) override
 	{
