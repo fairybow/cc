@@ -112,6 +112,8 @@ private:
 	// Holds all given widgets
 	StackedWidget* m_widgetStack = new StackedWidget(this);
 
+	// These become parented by the top_layout, itself a child of main_layout,
+	// in _setupLayouts()
 	QHBoxLayout* m_leftCornerWidgetLayout = new QHBoxLayout;
 	QHBoxLayout* m_controllerLayout = new QHBoxLayout;
 	QHBoxLayout* m_rightCornerWidgetLayout = new QHBoxLayout;

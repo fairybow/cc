@@ -63,8 +63,8 @@ public:
 
 	int indexOf(const QWidget* widget) const override
 	{
-		auto it = m_tabBarItemIdsToWidgets.begin();
-		auto end = m_tabBarItemIdsToWidgets.end();
+		auto it = m_tabBarItemIdsToWidgets.constBegin();
+		auto end = m_tabBarItemIdsToWidgets.constEnd();
 
 		while (it != end)
 		{

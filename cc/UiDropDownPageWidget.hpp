@@ -63,8 +63,8 @@ public:
 
 	int indexOf(const QWidget* widget) const override
 	{
-		auto it = m_comboBoxItemIdsToWidgets.begin();
-		auto end = m_comboBoxItemIdsToWidgets.end();
+		auto it = m_comboBoxItemIdsToWidgets.constBegin();
+		auto end = m_comboBoxItemIdsToWidgets.constEnd();
 
 		while (it != end)
 		{
