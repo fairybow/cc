@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-16
+* Updated: 2024-09-22
 */
 
 #include <QChar>
@@ -18,7 +18,6 @@
 #include <QDirIterator>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QHash>
 #include <QList>
 #include <QStandardPaths>
 #include <QString>
@@ -29,11 +28,12 @@
 #include <string>
 #include <unordered_map>
 
+// Forward declare for std::hash forward declaration lol
 class Path;
 
 namespace std
 {
-	/// @brief Provides std::hash compatibility
+	// Forward declare std::hash compatibility function
 	template <>
 	struct hash<Path>
 	{
@@ -48,10 +48,10 @@ namespace std
 class Path
 {
 public:
-	enum class Normalize { No, Yes };
-	enum class Recursive { No, Yes };
-	enum class SkipArg0 { No, Yes };
-	enum class ValidOnly { No, Yes };
+	enum class Normalize { No = 0, Yes };
+	enum class Recursive { No = 0, Yes };
+	enum class SkipArg0 { No = 0, Yes };
+	enum class ValidOnly { No = 0, Yes };
 
 	enum System
 	{
@@ -176,7 +176,6 @@ public:
 	{
 		//debug.nospace() << path.toQString();
 		//return debug.maybeSpace();
-
 		return debug << path.toQString(Normalize::Yes);
 	}
 
@@ -208,14 +207,12 @@ public:
 	Path& operator/=(const Path& other)
 	{
 		m_path /= other.m_path;
-
 		return *this;
 	}
 
 	Path& operator+=(const Path& other)
 	{
 		m_path += other.m_path;
-
 		return *this;
 	}
 
@@ -384,7 +381,6 @@ public:
 	Path& replaceExt(const Path& replacement = {})
 	{
 		m_path.replace_extension(replacement);
-
 		return *this;
 	}
 
@@ -411,7 +407,6 @@ public:
 	Path& makePreferred() noexcept
 	{
 		m_path.make_preferred();
-
 		return *this;
 	}
 
@@ -529,15 +524,17 @@ private:
 
 }; // class Path
 
+// Provides std::hash compatibility
 std::size_t std::hash<Path>::operator()(const Path& path) const
 {
 	return std::hash<std::filesystem::path>()(path.toStd());
 }
 
-inline uint qHash(const Path& path, uint seed = 0)
-{
-	return qHash(path.toStd(), seed);
-}
+// I believe this is unneeded, since we have std::hash compatibility
+// inline uint qHash(const Path& path, uint seed = 0)
+// {
+// 	return qHash(path.toStd(), seed);
+// }
 
 namespace PathDialog
 {

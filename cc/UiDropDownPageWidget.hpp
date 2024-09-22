@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-20
+* Updated: 2024-09-22
 */
 
 #include "cc_namespaces.hpp"
@@ -61,6 +61,16 @@ public:
 		return  qobject_cast<QComboBox*>(controller());
 	}
 
+	bool duplicatesEnabled() const
+	{
+		return comboBox()->duplicatesEnabled();
+	}
+
+	void setDuplicatesEnabled(bool enabled)
+	{
+		comboBox()->setDuplicatesEnabled(enabled);
+	}
+
 	int indexOf(const QWidget* widget) const override
 	{
 		auto it = m_comboBoxItemIdsToWidgets.constBegin();
@@ -92,6 +102,11 @@ public slots:
 	void setCurrentIndex(int index) override
 	{
 		comboBox()->setCurrentIndex(index);
+	}
+
+	void setCurrentText(const QString& text)
+	{
+		comboBox()->setCurrentText(text);
 	}
 
 private:

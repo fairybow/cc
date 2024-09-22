@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-20
+* Updated: 2024-09-22
 */
 
 #include "cc_namespaces.hpp"
@@ -59,6 +59,16 @@ public:
 	QTabBar* tabBar() const
 	{
 		return  qobject_cast<QTabBar*>(controller());
+	}
+
+	bool tabsMovable() const
+	{
+		return tabBar()->isMovable();
+	}
+
+	void setTabsMovable(bool movable)
+	{
+		tabBar()->setMovable(movable);
 	}
 
 	int indexOf(const QWidget* widget) const override
