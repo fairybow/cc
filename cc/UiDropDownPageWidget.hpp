@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-23
+* Updated: 2024-09-24
 */
 
 #include "cc_namespaces.hpp"
@@ -59,6 +59,16 @@ public:
 	QComboBox* comboBox() const
 	{
 		return  qobject_cast<QComboBox*>(controller());
+	}
+
+	bool isEditable() const
+	{
+		return comboBox()->isEditable();
+	}
+
+	void setEditable(bool editable)
+	{
+		comboBox()->setEditable(editable);
 	}
 
 	bool duplicatesEnabled() const
@@ -118,7 +128,7 @@ private:
 	{
 		auto combo_box = new QComboBox;
 		combo_box->setEditable(false);
-		combo_box->setDuplicatesEnabled(true);
+		combo_box->setDuplicatesEnabled(false);
 
 		combo_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
