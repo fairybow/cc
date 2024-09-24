@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-22
+* Updated: 2024-09-23
 */
 
 #include "UiAbstractPageWidget.h"
@@ -19,8 +19,8 @@ BEGIN_CC_UI_NAMESPACE
 AbstractPageWidget::AbstractPageWidget(QWidget* parent)
 	: QWidget(parent)
 {
-	_setupLayouts();
-	_setupStacks();
+	_initLayouts();
+	_initStacks();
 }
 
 void AbstractPageWidget::setContentsMargins(const QMargins& margins)
@@ -135,6 +135,11 @@ int AbstractPageWidget::count() const
 	return m_widgetStack->count();
 }
 
+QWidget* AbstractPageWidget::currentWidget() const
+{
+	return widgetAt(currentIndex());
+}
+
 // For subclasses to access the private widget stack. Since we don't give a shit
 // about the widget stack's index, we can return bool
 bool AbstractPageWidget::addWidget(QWidget* widget, const QVariant& data)
@@ -177,7 +182,7 @@ void AbstractPageWidget::onControllerIndexChanged(int index)
 	}
 }
 
-void AbstractPageWidget::_setupStacks()
+void AbstractPageWidget::_initStacks()
 {
 	m_underlay->setAlignment(Qt::AlignCenter);
 
@@ -194,7 +199,7 @@ void AbstractPageWidget::_setupStacks()
 	);
 }
 
-void AbstractPageWidget::_setupLayouts()
+void AbstractPageWidget::_initLayouts()
 {
 	m_leftCornerWidgetLayout->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_controllerLayout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);

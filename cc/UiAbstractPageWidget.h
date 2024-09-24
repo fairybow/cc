@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-15
+* Updated: 2024-09-23
 */
 
 #include "cc_namespaces.hpp"
@@ -73,6 +73,7 @@ public:
 
 	int findData(const QVariant& data) const;
 	int count() const;
+	QWidget* currentWidget() const;
 
 	virtual int addPage(QWidget* widget, const QString& label, const QVariant& data = {}) = 0;
 	// insert and remove
@@ -113,7 +114,7 @@ private:
 	StackedWidget* m_widgetStack = new StackedWidget(this);
 
 	// These become parented by the top_layout, itself a child of main_layout,
-	// in _setupLayouts()
+	// in _initLayouts()
 	QHBoxLayout* m_leftCornerWidgetLayout = new QHBoxLayout;
 	QHBoxLayout* m_controllerLayout = new QHBoxLayout;
 	QHBoxLayout* m_rightCornerWidgetLayout = new QHBoxLayout;
@@ -126,8 +127,8 @@ private:
 	QPointer<QWidget> m_controller{};
 	QPointer<QWidget> m_rightCornerWidget{};
 
-	void _setupStacks();
-	void _setupLayouts();
+	void _initStacks();
+	void _initLayouts();
 	void _setMember(QPointer<QWidget>& member, QLayout* parentLayout, QWidget* newWidget);
 
 private slots:

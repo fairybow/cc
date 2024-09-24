@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-22
+* Updated: 2024-09-23
 */
 
 #include "cc_namespaces.hpp"
@@ -32,7 +32,7 @@ public:
 	DropDownPageWidget(QWidget* parent = nullptr)
 		: AbstractPageWidget(parent)
 	{
-		_setupComboBox();
+		_initComboBox();
 	}
 
 	~DropDownPageWidget() = default;
@@ -114,7 +114,7 @@ private:
 	/// our widgets. They get confusing.
 	QHash<QUuid, QPointer<QWidget>> m_comboBoxItemIdsToWidgets{};
 
-	void _setupComboBox()
+	void _initComboBox()
 	{
 		auto combo_box = new QComboBox;
 		combo_box->setEditable(false);

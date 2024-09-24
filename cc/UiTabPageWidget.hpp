@@ -9,7 +9,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-09-22
+* Updated: 2024-09-23
 */
 
 #include "cc_namespaces.hpp"
@@ -31,7 +31,7 @@ public:
 	TabPageWidget(QWidget* parent = nullptr)
 		: AbstractPageWidget(parent)
 	{
-		_setupTabBar();
+		_initTabBar();
 	}
 
 	~TabPageWidget() = default;
@@ -115,7 +115,7 @@ private:
 	/// our widgets. They get confusing.
 	QHash<QUuid, QPointer<QWidget>> m_tabBarItemIdsToWidgets{};
 
-	void _setupTabBar()
+	void _initTabBar()
 	{
 		auto tab_bar = new QTabBar;
 		tab_bar->setMovable(true);
