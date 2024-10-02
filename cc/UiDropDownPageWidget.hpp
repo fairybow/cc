@@ -35,8 +35,6 @@ public:
 		_initComboBox();
 	}
 
-	~DropDownPageWidget() = default;
-
 	int addPage(QWidget* widget, const QString& label, const QVariant& data = {}) override
 	{
 		// Add widget and set user data for the widget, if provided

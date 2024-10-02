@@ -198,10 +198,10 @@ public:
 
 	Path operator/(const Path& other) const
 	{
-		Path result = *this;
-		result /= other;
+		Path path = *this;
+		path /= other;
 
-		return result;
+		return path;
 	}
 
 	Path& operator/=(const Path& other)

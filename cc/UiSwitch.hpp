@@ -48,8 +48,6 @@ public:
 		m_animation->setTargetObject(this);
 	}
 
-	virtual ~Switch() = default;
-
 	virtual QSize sizeHint() const
 	{
 		auto margins_space = _marginsSpace();

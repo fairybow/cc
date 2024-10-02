@@ -41,7 +41,6 @@ public:
 	};
 
 	AbstractPageWidget(QWidget* parent = nullptr);
-	virtual ~AbstractPageWidget() = default;
 
 	void setContentsMargins(const QMargins& margins);
 	void setContentsMargins(int left, int top, int right, int bottom);
